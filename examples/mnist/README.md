@@ -3,10 +3,15 @@
 This is a minimal example to write a feed-forward net specialized for inference.
 
 Optional arguments for running are as follows;
+
 1. --gpu=N, N=-1: CPU, N>-1: GPU(s), default N=-1
+
 2. --out='result': Specify output directory, default='result'
+
 3. --unit=U, Number of Units, default U=1000
+
 4. --num_inf=I, Number of Inferences, default=15
+
 5. --fig_num_clm=C, Number of Columns for Plottig Figures, default=5
 
 
