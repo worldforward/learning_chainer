@@ -16,9 +16,15 @@ Optional arguments for running are as follows;
 
 
 Requirement to run this script:
-You need copy following statements to your example/mnist/train_mnist.py after trainer.run() statement:
+You need to modify in your example/mnist/train_mnist.py from
+    model = L.Classifier(MLP(args.unit, 10))
+to:
+    Model = MLP(args.unit, 10)
+    model = L.Classifier(Model)
+
+In addition, you need copy following statements to your example/mnist/train_mnist.py after trainer.run() statement:
     # Save model
-    chainer.serializers.save_npz('my.model', trainer)
+    chainer.serializers.save_npz('my.model', Model)
 
 
 Acknowledgements:

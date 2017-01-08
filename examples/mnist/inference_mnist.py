@@ -9,6 +9,7 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 
+from chainer import optimizers
 from chainer import training
 from chainer import cuda
 
@@ -56,8 +57,7 @@ def main():
     print('')
 
     # Set up a neural network
-    model = L.Classifier(MLP(args.unit, 10))
-    model.train = False
+    model = MLP(args.unit, 10)
     if args.gpu >= 0:
         chainer.cuda.get_device(args.gpu).use()  # Make a specified GPU current
         model.to_gpu()  # Copy the model to the GPU
@@ -66,42 +66,44 @@ def main():
  
     # Load the MNIST dataset
     train, test = chainer.datasets.get_mnist()
-    train_iter = chainer.iterators.SerialIterator(train, args.batchsize)
 
-    # Setup an optimizer
-    optimizer = chainer.optimizers.Adam()
-    optimizer.setup(model)
-
-    # Set up a trainer
-    updater = training.StandardUpdater(train_iter, optimizer, device=args.gpu)
-    trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
-
-    # load model
-    model = training.Trainer(updater, (args.epoch, 'epoch'), out=args.out)
-    
+    # load model    
     chainer.serializers.load_npz('./my.model', model)
-    classifier_model = trainer.updater.get_optimizer('main').target
-    mlp_model = classifier_model.predictor
+    optimizer = optimizers.Adam(alpha=0.00005)
+    optimizer.setup(model)
 
     # show graphical results of first 15 data to understand what's going on in inference stage
     plt.figure(figsize=(args.num_inf, 10))
 
+    cnt_ok = 0
     for i in range(args.num_inf):
+        # Input vector
         x = chainer.Variable(xp.asarray([test[i][0]]))  # test data
-        y = mlp_model(x)
-
-        np.set_printoptions(precision=2, suppress=True)
-        print('{}-th image: answer = {}, predict = {}'.format(i, test[i][1], F.softmax(y).data))
         
+        # Forwward Propagation
+        y = model(x)
+        F.softmax(y).data
+        
+        # Predication
         prediction = y.data.argmax(axis=1)
-        test_image = (test[i][0] * 255).astype(np.int32).reshape(28, 28)
+        predict_awnswer = max(prediction)
+        
+        # Decision of OK/NG
+        decision = "NG"
+        if predict_awnswer == test[i][1]:
+            cnt_ok += 1
+            decision = "OK"
 
+        print('%04d-th image: answer = %d, predict = %d: %s' % (i, test[i][1], predict_awnswer, decision))
+        
+        np.set_printoptions(precision=2, suppress=True)
+        test_image = (test[i][0] * 255).astype(np.int32).reshape(28, 28)
         plt.subplot(args.num_inf/args.fig_num_clm, args.fig_num_clm, i+1)
         plt.imshow(test_image, cmap='gray')
         plt.title("No.{0} / Answer:{1}, Predict:{2}".format(i, test[i][1], prediction))
         plt.axis("off")
 
-    plt.tight_layout()
+#    plt.tight_layout()
     plt.savefig('{}/predict.png'.format(args.out))
 
 if __name__ == '__main__':
