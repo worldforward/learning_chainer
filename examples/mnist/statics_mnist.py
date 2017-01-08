@@ -83,9 +83,6 @@ def main():
 
     # Set up a neural network
     model = MLP(args.unit, 10)
- 
-    # Load the MNIST dataset
-    train, test = chainer.datasets.get_mnist()
 
     # load model    
     chainer.serializers.load_npz(args.model_path, model)
