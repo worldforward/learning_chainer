@@ -106,5 +106,7 @@ def main():
 #    plt.tight_layout()
     plt.savefig('{}/predict.png'.format(args.out))
 
+    print("Accuracy=%f" % (float(cnt_ok)/float(args.num_inf)))
+
 if __name__ == '__main__':
     main()
