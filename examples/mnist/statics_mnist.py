@@ -1,14 +1,7 @@
 import argparse
-import pickle 
-import matplotlib.pyplot as plt
-import numpy as np
-import chainer.links
 import chainer.functions as F
 import chainer.links as L
-import os
-
-from chainer import optimizers
-from chainer import training
+import chainer.links
 
 # Pixel Configuration: 28*28=784
 img_width = 28
@@ -50,7 +43,7 @@ class statics_param():
     def __getParam(self):
         params = []       
         for key in self.model.__dict__.keys():
-            if isinstance(self.model.__dict__[key], chainer.links.connection.linear.Linear):
+            if isinstance(self.model.__dict__[key], L.connection.linear.Linear):
                 params.append(key)
         return params
 
@@ -84,10 +77,8 @@ def main():
     # Set up a neural network
     model = MLP(args.unit, 10)
 
-    # load model    
+    # Load model    
     chainer.serializers.load_npz(args.model_path, model)
-    optimizer = optimizers.Adam()
-    optimizer.setup(model)
 
     # Make statics instance
     vp = statics_param(model)
